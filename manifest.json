@@ -1,0 +1,78 @@
+{
+  "name": "Calculadora de Números Complejos Pro",
+  "short_name": "Calc Compleja Pro",
+  "description": "Calculadora avanzada de números complejos con funciones trigonométricas, exponenciales, historial, modo oscuro y gráficas. Funciona completamente sin internet.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#667eea",
+  "theme_color": "#2196F3",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%23667eea' rx='20'/%3E%3Ctext x='96' y='140' font-size='120' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'%3EC%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23667eea' rx='50'/%3E%3Ctext x='256' y='380' font-size='320' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'%3EC%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "utilities", "productivity"],
+  "lang": "es",
+  "dir": "ltr",
+  "scope": "./",
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Calculadora Básica",
+      "short_name": "Básica",
+      "description": "Operaciones básicas con números complejos",
+      "url": "./?tab=basic",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' fill='%23667eea'/%3E%3Ctext x='48' y='65' font-size='50' text-anchor='middle' fill='white'%3E%2B%3C/text%3E%3C/svg%3E",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Funciones Avanzadas",
+      "short_name": "Avanzadas",
+      "description": "Exponenciales, logaritmos y raíces",
+      "url": "./?tab=advanced",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' fill='%23764ba2'/%3E%3Ctext x='48' y='65' font-size='40' text-anchor='middle' fill='white'%3Ee%5Ex%3C/text%3E%3C/svg%3E",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Historial",
+      "short_name": "Historial",
+      "description": "Ver historial de operaciones",
+      "url": "./?action=history",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' fill='%234CAF50'/%3E%3Ctext x='48' y='65' font-size='50' text-anchor='middle' fill='white'%3E%F0%9F%93%9C%3C/text%3E%3C/svg%3E",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'%3E%3Crect width='540' height='720' fill='%23667eea'/%3E%3Crect x='20' y='20' width='500' height='680' fill='white' rx='10'/%3E%3Ctext x='270' y='100' font-size='30' text-anchor='middle' fill='%23333' font-weight='bold'%3ECalculadora Compleja Pro%3C/text%3E%3C/svg%3E",
+      "sizes": "540x720",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ]
+}

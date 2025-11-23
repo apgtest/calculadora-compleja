@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Calculadora avanzada de números complejos con funciones trigonométricas, exponenciales, historial y modo oscuro">
+    <meta name="theme-color" content="#2196F3">
+    
+    <!-- Link al manifest para PWA -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Icono SVG inline para iOS/Android -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23667eea'/%3E%3Ctext x='50' y='70' font-size='60' text-anchor='middle' fill='white' font-family='Arial'%3EC%3C/text%3E%3C/svg%3E">
+    
+    <title>Calculadora Compleja Avanzada</title>
+    
+    <style>
+        /* ========================================
+           VARIABLES CSS PARA TEMAS
+           ======================================== */
+        
+        :root {
+            /* Tema Claro */
+            --bg-gradient-start: #667eea;
+            --bg-gradient-end: #764ba2;
+            --container-bg: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --text-tertiary: #999999;
+            --display-bg: #f5f5f5;
+            --input-border: #dddddd;
+            --input-focus: #667eea;
+            --btn-primary: #667eea;
+            --btn-primary-hover: #5568d3;
+            --btn-secondary: #764ba2;
+            --btn-secondary-hover: #653a8a;
+            --btn-danger: #f44336;
+            --btn-danger-hover: #da190b;
+            --btn-success: #4CAF50;
+            --btn-success-hover: #388E3C;
+            --help-bg: #e3f2fd;
+            --help-title: #1976D2;
+            --history-bg: #fafafa;
+            --history-item-bg: #ffffff;
+            --history-item-hover: #f0f0f0;
+            --modal-overlay: rgba(0, 0, 0, 0.5);
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Tema Oscuro */
+        [data-theme="dark"] {
+            --bg-gradient-start: #1a1a2e;
+            --bg-gradient-end: #16213e;
+            --container-bg: #0f3460;
+            --text-primary: #e4e4e4;
+            --text-secondary: #b8b8b8;
+            --text-tertiary: #888888;
+            --display-bg: #1a1a2e;
+            --input-border: #2a2a4e;
+            --input-focus: #667eea;
+            --btn-primary: #667eea;
+            --btn-primary-hover: #7c8ef0;
+            --btn-secondary: #764ba2;
+            --btn-secondary-hover: #8a5fb8;
+            --btn-danger: #f44336;
+            --btn-danger-hover: #ff5a4e;
+            --btn-success: #4CAF50;
+            --btn-success-hover: #66bb6a;
+            --help-bg: #1a2332;
+            --help-title: #64b5f6;
+            --history-bg: #0a1929;
+            --history-item-bg: #1a2332;
+            --history-item-hover: #243447;
+            --modal-overlay: rgba(0, 0, 0, 0.7);
+            --shadow: rgba(0, 0, 0, 0.5);
+        }
+        
+        /* ========================================
+           ESTILOS GENERALES
+           ======================================== */
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            transition: background 0.3s ease;
+        }
+        
+        /* ========================================
+           CONTENEDOR PRINCIPAL
+           ======================================== */
+        
+        .calculator-container {
+            background: var(--container-bg);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px var(--shadow);
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        /* ========================================
+           HEADER CON CONTROLES
+           ======================================== */
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        h1 {
+            color: var(--text-primary);
+            font-size: 28px;
+            margin-bottom: 10px;
+            transition: color 0.3s ease;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        /* Botones de control (tema, historial, etc) */
+        .control-btn {
+            background: var(--btn-secondary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .control-btn:hover {
+            background: var(--btn-secondary-hover);
+            transform: translateY(-2px);
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status.online {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .status.offline {
+            background: #ff9800;
+            color: white;
+        }
+        
+        /* ========================================
+           PESTAÑAS (TABS)
+           ======================================== */
+        
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--input-border);
+            overflow-x: auto;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+        }
+        
+        .tab:hover {
+            color: var(--text-primary);
+        }
+        
+        .tab.active {
+            color: var(--btn-primary);
+            border-bottom-color: var(--btn-primary);
+        }
+        
+        /* Contenido de pestañas */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* ========================================
+           PANTALLA DE RESULTADOS
+           ======================================== */
+        
+        .display {
+            background: var(--display-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: background 0.3s ease;
+        }
+        
+        .operation {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+            min-height: 20px;
+            word-wrap: break-word;
+        }
+        
+        .result {
+            font-size: 24px;
+            color: var(--text-primary);
+            font-weight: bold;
+            word-wrap: break-word;
+        }
+        
+        /* ========================================
+           INPUTS PARA NÚMEROS COMPLEJOS
+           ======================================== */
+        
+        .input-section {
+            margin-bottom: 20px;
+        }
+        
+        .complex-input {
+            margin-bottom: 15px;
+        }
+        
+        .complex-input label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--input-border);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s, background 0.3s, color 0.3s;
+            background: var(--container-bg);
+            color: var(--text-primary);
+        }
+        
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--input-focus);
+        }
+        
+        .input-label {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-tertiary);
+            font-size: 14px;
+            pointer-events: none;
+        }
+        
+        .operator-sign {
+            color: var(--btn-primary);
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        /* ========================================
+           BOTONES
+           ======================================== */
+        
+        .operations {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+        
+        .btn-operation {
+            background: var(--btn-primary);
+        }
+        
+        .btn-operation:hover {
+            background: var(--btn-primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+        
+        .btn-function {
+            background: var(--btn-secondary);
+            font-size: 14px;
+        }
+        
+        .btn-function:hover {
+            background: var(--btn-secondary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+        
+        .btn-clear {
+            background: var(--btn-danger);
+        }
+        
+        .btn-clear:hover {
+            background: var(--btn-danger-hover);
+            transform: translateY(-2px);
+        }
+        
+        .btn-equals {
+            background: var(--btn-success);
+        }
+        
+        .btn-equals:hover {
+            background: var(--btn-success-hover);
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        /* ========================================
+           HISTORIAL
+           ======================================== */
+        
+        .history-section {
+            background: var(--history-bg);
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            transition: background 0.3s ease;
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .history-header h3 {
+            color: var(--text-primary);
+            font-size: 18px;
+        }
+        
+        .history-item {
+            background: var(--history-item-bg);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid var(--btn-primary);
+            transition: background 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .history-item:hover {
+            background: var(--history-item-hover);
+        }
+        
+        .history-operation {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-bottom: 3px;
+        }
+        
+        .history-result {
+            color: var(--text-primary);
+            font-size: 15px;
+            font-weight: bold;
+        }
+        
+        .history-time {
+            color: var(--text-tertiary);
+            font-size: 11px;
+            margin-top: 3px;
+        }
+        
+        .history-empty {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 30px;
+            font-style: italic;
+        }
+        
+        /* ========================================
+           MODAL
+           ======================================== */
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--modal-overlay);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: var(--container-bg);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px var(--shadow);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            color: var(--text-primary);
+            font-size: 22px;
+        }
+        
+        .close-btn {
+            background: var(--btn-danger);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-btn:hover {
+            background: var(--btn-danger-hover);
+        }
+        
+        /* ========================================
+           GRÁFICA DEL PLANO COMPLEJO
+           ======================================== */
+        
+        .graph-container {
+            background: var(--display-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        #complexPlane {
+            width: 100%;
+            height: 400px;
+            border: 2px solid var(--input-border);
+            border-radius: 8px;
+            background: white;
+        }
+        
+        /* ========================================
+           AYUDA
+           ======================================== */
+        
+        .help {
+            background: var(--help-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            transition: background 0.3s ease;
+        }
+        
+        .help h3 {
+            color: var(--help-title);
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .help p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+        
+        .help-section {
+            margin-bottom: 15px;
+        }
+        
+        .help-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* ========================================
+           EXPORTAR PDF
+           ======================================== */
+        
+        .export-section {
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .export-btn {
+            background: var(--btn-secondary);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .export-btn:hover {
+            background: var(--btn-secondary-hover);
+            transform: translateY(-2px);
+        }
+        
+        /* ========================================
+           RESPONSIVE
+           ======================================== */
+        
+        @media (max-width: 600px) {
+            .calculator-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .operations {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+            }
+            
+            button {
+                padding: 12px;
+                font-size: 16px;
+            }
+            
+            .btn-function {
+                font-size: 12px;
+            }
+            
+            .tabs {
+                font-size: 12px;
+            }
+            
+            .tab {
+                padding: 8px 12px;
+            }
+        }
+        
+        /* ========================================
+           SCROLLBAR PERSONALIZADA
+           ======================================== */
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--display-bg);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--btn-primary);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--btn-primary-hover);
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        
+        <!-- HEADER -->
+        <div class="header">
+            <h1>🔢 Calculadora Compleja Pro</h1>
+            <div class="controls">
+                <button class="control-btn" onclick="toggleTheme()" id="themeBtn">🌙 Modo Oscuro</button>
+                <button class="control-btn" onclick="openModal('historyModal')">📜 Historial</button>
+                <button class="control-btn" onclick="openModal('helpModal')">❓ Ayuda</button>
+                <span class="status online" id="status">🟢 Online</span>
+            </div>
+        </div>
+        
+        <!-- PESTAÑAS -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('basic')">Básicas</button>
+            <button class="tab" onclick="switchTab('advanced')">Avanzadas</button>
+            <button class="tab" onclick="switchTab('trig')">Trigonométricas</button>
+            <button class="tab" onclick="switchTab('graph')">Gráfica</button>
+        </div>
+        
+        <!-- PANTALLA -->
+        <div class="display">
+            <div class="operation" id="operation"></div>
+            <div class="result" id="result">0</div>
+        </div>
+        
+        <!-- TAB: OPERACIONES BÁSICAS -->
+        <div id="tab-basic" class="tab-content active">
+            <div class="input-section">
+                <div class="complex-input">
+                    <label>Número Complejo z₁:</label>
+                    <div class="input-group">
+                        <div class="input-wrapper">
+                            <input type="number" id="z1-real" placeholder="Real" step="any" value="0">
+                            <span class="input-label">Re</span>
+                        </div>
+                        <span class="operator-sign">+</span>
+                        <div class="input-wrapper">
+                            <input type="number" id="z1-imag" placeholder="Imag" step="any" value="0">
+                            <span class="input-label">i</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="complex-input">
+                    <label>Número Complejo z₂:</label>
+                    <div class="input-group">
+                        <div class="input-wrapper">
+                            <input type="number" id="z2-real" placeholder="Real" step="any" value="0">
+                            <span class="input-label">Re</span>
+                        </div>
+                        <span class="operator-sign">+</span>
+                        <div class="input-wrapper">
+                            <input type="number" id="z2-imag" placeholder="Imag" step="any" value="0">
+                            <span class="input-label">i</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="operations">
+                <button class="btn-operation" onclick="calculate('add')">+</button>
+                <button class="btn-operation" onclick="calculate('subtract')">−</button>
+                <button class="btn-operation" onclick="calculate('multiply')">×</button>
+                <button class="btn-operation" onclick="calculate('divide')">÷</button>
+            </div>
+            
+            <div class="operations">
+                <button class="btn-function" onclick="calculate('conjugate1')">Conj z₁</button>
+                <button class="btn-function" onclick="calculate('conjugate2')">Conj z₂</button>
+                <button class="btn-function" onclick="calculate('modulus1')">|z₁|</button>
+                <button class="btn-function" onclick="calculate('modulus2')">|z₂|</button>
+            </div>
+            
+            <div class="operations">
+                <button class="btn-clear" onclick="clearAll()">Limpiar</button>
+                <button class="btn-clear" onclick="clearAll()">AC</button>
+                <button class="btn-equals" onclick="calculate('polar1')">Polar z₁</button>
+                <button class="btn-equals" onclick="calculate('polar2')">Polar z₂</button>
+            </div>
+        </div>
+        
+        <!-- TAB: OPERACIONES AVANZADAS -->
+        <div id="tab-advanced" class="tab-content">
+            <div class="operations">
+                <button class="btn-function" onclick="calculate('power')">z₁ⁿ</button>
+                <button class="btn-function" onclick="calculate('root')">ⁿ√z₁</button>
+                <button class="btn-function" onclick="calculate('exp1')">e^z₁</button>
+                <button class="btn-function" onclick="calculate('exp2')">e^z₂</button>
+            </div>
+            
+            <div class="operations">
+                <button class="btn-function" onclick="calculate('ln1')">ln(z₁)</button>
+                <button class="btn-function" onclick="calculate('ln2')">ln(z₂)</button>
+                <button class="btn-function" onclick="calculate('sqrt1')">√z₁</button>
+                <button class="btn-function" onclick="calculate('sqrt2')">√z₂</button>
+            </div>
+            
+            <div class="operations">
+                <button class="btn-function" onclick="calculate('inverse1')">1/z₁</button>
+                <button class="btn-function" onclick="calculate('inverse2')">1/z₂</button>
+                <button class="btn-function" onclick="calculate('argument1')">Arg z₁</button>
+                <button class="btn-function" onclick="calculate('argument2')">Arg z₂</button>
+            </div>
+        </div>
+        
+        <!-- TAB: FUNCIONES TRIGONOMÉTRICAS -->
+        <div id="tab-trig" class="tab-content">
+            <div class="operations">
+                <button class="btn-function" onclick="calculate('sin1')">sin(z₁)</button>
+                <button class="btn-function" onclick="calculate('cos1')">cos(z₁)</button>
+                <button class="btn-function" onclick="calculate('tan1')">tan(z₁)</button>
+                <button class="btn-function" onclick="calculate('cot1')">cot(z₁)</button>
+            </div>
+            
+            <div class="operations">
+                <button class="btn-function" onclick="calculate('sinh1')">sinh(z₁)</button>
+                <button class="btn-function" onclick="calculate('cosh1')">cosh(z₁)</button>
+                <button class="btn-function" onclick="calculate('tanh1')">tanh(z₁)</button>
+                <button class="btn-function" onclick="calculate('sec1')">sec(z₁)</button>
+            </div>
+            
+            <div class="operations">
+                <button class="btn-function" onclick="calculate('sin2')">sin(z₂)</button>
+                <button class="btn-function" onclick="calculate('cos2')">cos(z₂)</button>
+                <button class="btn-function" onclick="calculate('tan2')">tan(z₂)</button>
+                <button class="btn-function" onclick="calculate('sinh2')">sinh(z₂)</button>
+            </div>
+        </div>
+        
+        <!-- TAB: GRÁFICA -->
+        <div id="tab-graph" class="tab-content">
+            <div class="graph-container">
+                <canvas id="complexPlane"></canvas>
+            </div>
+            <div class="operations" style="margin-top: 15px;">
+                <button class="btn-function" onclick="plotNumbers()">Graficar</button>
+                <button class="btn-function" onclick="clearGraph()">Limpiar</button>
+                <button class="btn-function" onclick="plotOperation()">Graficar Op.</button>
+                <button class="btn-function" onclick="zoomGraph('in')">Zoom +</button>
+            </div>
+        </div>
+        
+        <!-- AYUDA RÁPIDA -->
+        <div class="help">
+            <h3>💡 Ayuda Rápida</h3>
+            <p><strong>Formato:</strong> a + bi donde 'a' es real y 'b' es imaginario</p>
+            <p><strong>Ejemplo:</strong> 3 + 4i → Real: 3, Imag: 4</p>
+            <p><strong>Atajos:</strong> Enter = calcular | Esc = limpiar</p>
+        </div>
+    </div>
+    
+    <!-- MODAL: HISTORIAL -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📜 Historial de Operaciones</h2>
+                <button class="close-btn" onclick="closeModal('historyModal')">×</button>
+            </div>
+            <div class="history-section">
+                <div class="history-header">
+                    <h3>Operaciones Recientes</h3>
+                    <button class="control-btn" onclick="clearHistory()">🗑️ Limpiar</button>
+                </div>
+                <div id="historyList"></div>
+            </div>
+            <div class="export-section">
+                <button class="export-btn" onclick="exportHistory()">📄 Exportar Historial</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MODAL: AYUDA COMPLETA -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>❓ Guía Completa</h2>
+                <button class="close-btn" onclick="closeModal('helpModal')">×</button>
+            </div>
+            
+            <div class="help-section">
+                <h3>🔢 ¿Qué son los números complejos?</h3>
+                <p>Los números complejos tienen la forma <strong>z = a + bi</strong> donde:</p>
+                <p>• <strong>a</strong> = parte real (Re)</p>
+                <p>• <strong>b</strong> = parte imaginaria (Im)</p>
+                <p>• <strong>i</strong> = unidad imaginaria (i² = -1)</p>
+            </div>
+            
+            <div class="help-section">
+                <h3>➕ Operaciones Básicas</h3>
+                <p><strong>Suma:</strong> (a+bi) + (c+di) = (a+c) + (b+d)i</p>
+                <p><strong>Resta:</strong> (a+bi) - (c+di) = (a-c) + (b-d)i</p>
+                <p><strong>Multiplicación:</strong> (a+bi)(c+di) = (ac-bd) + (ad+bc)i</p>
+                <p><strong>División:</strong> Multiplica por conjugado del denominador</p>
+            </div>
+            
+            <div class="help-section">
+                <h3>🔬 Funciones Avanzadas</h3>
+                <p><strong>Conjugado:</strong> z̄ = a - bi</p>
+                <p><strong>Módulo:</strong> |z| = √(a² + b²)</p>
+                <p><strong>Argumento:</strong> arg(z) = arctan(b/a)</p>
+                <p><strong>Forma Polar:</strong> z = r∠θ = r·e^(iθ)</p>
+                <p><strong>Exponencial:</strong> e^(a+bi) = e^a(cos(b) + i·sin(b))</p>
+            </div>
+            
+            <div class="help-section">
+                <h3>📐 Funciones Trigonométricas</h3>
+                <p><strong>sin(z):</strong> Seno complejo</p>
+                <p><strong>cos(z):</strong> Coseno complejo</p>
+                <p><strong>tan(z):</strong> Tangente compleja</p>
+                <p><strong>sinh/cosh/tanh:</strong> Funciones hiperbólicas</p>
+            </div>
+            
+            <div class="help-section">
+                <h3>⌨️ Atajos de Teclado</h3>
+                <p><strong>Enter:</strong> Calcular operación</p>
+                <p><strong>Escape:</strong> Limpiar todo</p>
+                <p><strong>Tab:</strong> Navegar entre campos</p>
+            </div>
+            
+            <div class="help-section">
+                <h3>📊 Gráfica del Plano Complejo</h3>
+                <p>Visualiza números complejos en el plano de Argand:</p>
+                <p>• <strong>Eje X:</strong> Parte real</p>
+                <p>• <strong>Eje Y:</strong> Parte imaginaria</p>
+                <p>• <strong>Vector:</strong> Desde origen hasta el punto</p>
+            </div>
+            
+            <div class="help-section">
+                <h3>🌙 Características</h3>
+                <p>✓ Modo oscuro para proteger tus ojos</p>
+                <p>✓ Historial de operaciones completo</p>
+                <p>✓ Exportar resultados a texto</p>
+                <p>✓ Funciona completamente sin internet</p>
+                <p>✓ Gráficas interactivas del plano complejo</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ========================================
+           REGISTRO DEL SERVICE WORKER
+           ======================================== */
+        
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker registrado:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('❌ Error al registrar Service Worker:', error);
+                    });
+            });
+        }
+        
+        /* ========================================
+           DETECTOR DE ESTADO ONLINE/OFFLINE
+           ======================================== */
+        
+        const statusElement = document.getElementById('status');
+        
+        function updateOnlineStatus() {
+            if (navigator.onLine) {
+                statusElement.textContent = '🟢 Online';
+                statusElement.className = 'status online';
+            } else {
+                statusElement.textContent = '🔴 Offline';
+                statusElement.className = 'status offline';
+            }
+        }
+        
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        updateOnlineStatus();
+        
+        /* ========================================
+           CLASE PARA NÚMEROS COMPLEJOS MEJORADA
+           ======================================== */
+        
+        class Complex {
+            constructor(real, imag) {
+                this.real = real;
+                this.imag = imag;
+            }
+            
+            // Operaciones básicas
+            add(other) {
+                return new Complex(
+                    this.real + other.real,
+                    this.imag + other.imag
+                );
+            }
+            
+            subtract(other) {
+                return new Complex(
+                    this.real - other.real,
+                    this.imag - other.imag
+                );
+            }
+            
+            multiply(other) {
+                return new Complex(
+                    this.real * other.real - this.imag * other.imag,
+                    this.real * other.imag + this.imag * other.real
+                );
+            }
+            
+            divide(other) {
+                const denominator = other.real * other.real + other.imag * other.imag;
+                if (denominator === 0) {
+                    throw new Error('División por cero');
+                }
+                return new Complex(
+                    (this.real * other.real + this.imag * other.imag) / denominator,
+                    (this.imag * other.real - this.real * other.imag) / denominator
+                );
+            }
+            
+            conjugate() {
+                return new Complex(this.real, -this.imag);
+            }
+            
+            modulus() {
+                return Math.sqrt(this.real * this.real + this.imag * this.imag);
+            }
+            
+            argument() {
+                return Math.atan2(this.imag, this.real);
+            }
+            
+            power(n) {
+                const r = this.modulus();
+                const theta = this.argument();
+                const newR = Math.pow(r, n);
+                const newTheta = n * theta;
+                return new Complex(
+                    newR * Math.cos(newTheta),
+                    newR * Math.sin(newTheta)
+                );
+            }
+            
+            // Raíz n-ésima (devuelve la primera raíz principal)
+            root(n) {
+                if (n === 0) throw new Error('No se puede calcular raíz de orden 0');
+                const r = this.modulus();
+                const theta = this.argument();
+                const newR = Math.pow(r, 1/n);
+                const newTheta = theta / n;
+                return new Complex(
+                    newR * Math.cos(newTheta),
+                    newR * Math.sin(newTheta)
+                );
+            }
+            
+            // Raíz cuadrada
+            sqrt() {
+                return this.root(2);
+            }
+            
+            // Exponencial: e^z = e^(a+bi) = e^a * (cos(b) + i*sin(b))
+            exp() {
+                const expReal = Math.exp(this.real);
+                return new Complex(
+                    expReal * Math.cos(this.imag),
+                    expReal * Math.sin(this.imag)
+                );
+            }
+            
+            // Logaritmo natural: ln(z) = ln|z| + i*arg(z)
+            ln() {
+                const r = this.modulus();
+                if (r === 0) throw new Error('ln(0) no está definido');
+                const theta = this.argument();
+                return new Complex(Math.log(r), theta);
+            }
+            
+            // Inverso: 1/z
+            inverse() {
+                const denominator = this.real * this.real + this.imag * this.imag;
+                if (denominator === 0) throw new Error('División por cero');
+                return new Complex(
+                    this.real / denominator,
+                    -this.imag / denominator
+                );
+            }
+            
+            // FUNCIONES TRIGONOMÉTRICAS
+            
+            // sin(z) = (e^(iz) - e^(-iz)) / (2i)
+            sin() {
+                const iz = new Complex(-this.imag, this.real);
+                const negIz = new Complex(this.imag, -this.real);
+                const ePlus = iz.exp();
+                const eMinus = negIz.exp();
+                const diff = ePlus.subtract(eMinus);
+                return new Complex(diff.imag / 2, -diff.real / 2);
+            }
+            
+            // cos(z) = (e^(iz) + e^(-iz)) / 2
+            cos() {
+                const iz = new Complex(-this.imag, this.real);
+                const negIz = new Complex(this.imag, -this.real);
+                const ePlus = iz.exp();
+                const eMinus = negIz.exp();
+                const sum = ePlus.add(eMinus);
+                return new Complex(sum.real / 2, sum.imag / 2);
+            }
+            
+            // tan(z) = sin(z) / cos(z)
+            tan() {
+                const sinZ = this.sin();
+                const cosZ = this.cos();
+                return sinZ.divide(cosZ);
+            }
+            
+            // cot(z) = cos(z) / sin(z)
+            cot() {
+                const sinZ = this.sin();
+                const cosZ = this.cos();
+                return cosZ.divide(sinZ);
+            }
+            
+            // sec(z) = 1 / cos(z)
+            sec() {
+                const cosZ = this.cos();
+                return cosZ.inverse();
+            }
+            
+            // FUNCIONES HIPERBÓLICAS
+            
+            // sinh(z) = (e^z - e^(-z)) / 2
+            sinh() {
+                const ePlus = this.exp();
+                const neg = new Complex(-this.real, -this.imag);
+                const eMinus = neg.exp();
+                const diff = ePlus.subtract(eMinus);
+                return new Complex(diff.real / 2, diff.imag / 2);
+            }
+            
+            // cosh(z) = (e^z + e^(-z)) / 2
+            cosh() {
+                const ePlus = this.exp();
+                const neg = new Complex(-this.real, -this.imag);
+                const eMinus = neg.exp();
+                const sum = ePlus.add(eMinus);
+                return new Complex(sum.real / 2, sum.imag / 2);
+            }
+            
+            // tanh(z) = sinh(z) / cosh(z)
+            tanh() {
+                const sinhZ = this.sinh();
+                const coshZ = this.cosh();
+                return sinhZ.divide(coshZ);
+            }
+            
+            // Conversión a string
+            toString() {
+                if (this.imag === 0) return this.real.toFixed(4);
+                if (this.real === 0) return `${this.imag.toFixed(4)}i`;
+                
+                const sign = this.imag > 0 ? '+' : '';
+                return `${this.real.toFixed(4)} ${sign} ${this.imag.toFixed(4)}i`;
+            }
+            
+            // Forma polar
+            toPolar() {
+                const r = this.modulus();
+                const theta = this.argument();
+                const degrees = theta * (180 / Math.PI);
+                return `${r.toFixed(4)}∠${degrees.toFixed(2)}°`;
+            }
+        }
+        
+        /* ========================================
+           GESTIÓN DEL HISTORIAL
+           ======================================== */
+        
+        let history = [];
+        
+        // Cargar historial desde localStorage
+        function loadHistory() {
+            const saved = localStorage.getItem('complexCalcHistory');
+            if (saved) {
+                history = JSON.parse(saved);
+            }
+        }
+        
+        // Guardar historial en localStorage
+        function saveHistory() {
+            localStorage.setItem('complexCalcHistory', JSON.stringify(history));
+        }
+        
+        // Agregar operación al historial
+        function addToHistory(operation, result) {
+            const now = new Date();
+            const timeStr = now.toLocaleString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            history.unshift({
+                operation: operation,
+                result: result,
+                timestamp: timeStr,
+                time: now.getTime()
+            });
+            
+            // Limitar historial a 50 entradas
+            if (history.length > 50) {
+                history = history.slice(0, 50);
+            }
+            
+            saveHistory();
+            updateHistoryDisplay();
+        }
+        
+        // Actualizar visualización del historial
+        function updateHistoryDisplay() {
+            const historyList = document.getElementById('historyList');
+            
+            if (history.length === 0) {
+                historyList.innerHTML = '<div class="history-empty">No hay operaciones en el historial</div>';
+                return;
+            }
+            
+            historyList.innerHTML = history.map(item => `
+                <div class="history-item" onclick="loadFromHistory('${item.operation}', '${item.result}')">
+                    <div class="history-operation">${item.operation}</div>
+                    <div class="history-result">= ${item.result}</div>
+                    <div class="history-time">${item.timestamp}</div>
+                </div>
+            `).join('');
+        }
+        
+        // Cargar operación desde historial
+        function loadFromHistory(operation, result) {
+            document.getElementById('operation').textContent = operation;
+            document.getElementById('result').textContent = result;
+            closeModal('historyModal');
+        }
+        
+        // Limpiar historial
+        function clearHistory() {
+            if (confirm('¿Estás seguro de que quieres eliminar todo el historial?')) {
+                history = [];
+                saveHistory();
+                updateHistoryDisplay();
+            }
+        }
+        
+        // Exportar historial
+        function exportHistory() {
+            if (history.length === 0) {
+                alert('No hay operaciones para exportar');
+                return;
+            }
+            
+            let text = 'HISTORIAL DE CALCULADORA COMPLEJA\n';
+            text += '==================================\n\n';
+            
+            history.forEach((item, index) => {
+                text += `${index + 1}. ${item.timestamp}\n`;
+                text += `   Operación: ${item.operation}\n`;
+                text += `   Resultado: ${item.result}\n\n`;
+            });
+            
+            // Crear y descargar archivo
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `historial_calculadora_${new Date().getTime()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        /* ========================================
+           GESTIÓN DE PESTAÑAS
+           ======================================== */
+        
+        function switchTab(tabName) {
+            // Desactivar todas las pestañas
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Activar pestaña seleccionada
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            // Si es la pestaña de gráfica, inicializar canvas
+            if (tabName === 'graph') {
+                setTimeout(() => drawAxes(), 100);
+            }
+        }
+        
+        /* ========================================
+           GESTIÓN DE MODALES
+           ======================================== */
+        
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            if (modalId === 'historyModal') {
+                updateHistoryDisplay();
+            }
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+        
+        // Cerrar modal al hacer click fuera
+        window.addEventListener('click', (event) => {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        });
+        
+        /* ========================================
+           TEMA OSCURO/CLARO
+           ======================================== */
+        
+        let isDarkTheme = false;
+        
+        function toggleTheme() {
+            isDarkTheme = !isDarkTheme;
+            const body = document.documentElement;
+            const btn = document.getElementById('themeBtn');
+            
+            if (isDarkTheme) {
+                body.setAttribute('data-theme', 'dark');
+                btn.textContent = '☀️ Modo Claro';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.removeAttribute('data-theme');
+                btn.textContent = '🌙 Modo Oscuro';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+        
+        // Cargar tema guardado
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                isDarkTheme = false; // Para que toggleTheme lo active
+                toggleTheme();
+            }
+        }
+        
+        /* ========================================
+           GRÁFICA DEL PLANO COMPLEJO
+           ======================================== */
+        
+        let canvas, ctx;
+        let scale = 50; // Píxeles por unidad
+        let originX, originY;
+        let plottedPoints = [];
+        
+        function initCanvas() {
+            canvas = document.getElementById('complexPlane');
+            if (!canvas) return;
+            
+            ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            originX = canvas.width / 2;
+            originY = canvas.height / 2;
+            
+            drawAxes();
+        }
+        
+        function drawAxes() {
+            if (!ctx) initCanvas();
+            if (!ctx) return;
+            
+            // Limpiar canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Fondo
+            ctx.fillStyle = isDarkTheme ? '#1a1a2e' : '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Ejes
+            ctx.strokeStyle = isDarkTheme ? '#666' : '#ccc';
+            ctx.lineWidth = 1;
+            
+            // Eje X (Real)
+            ctx.beginPath();
+            ctx.moveTo(0, originY);
+            ctx.lineTo(canvas.width, originY);
+            ctx.stroke();
+            
+            // Eje Y (Imaginario)
+            ctx.beginPath();
+            ctx.moveTo(originX, 0);
+            ctx.lineTo(originX, canvas.height);
+            ctx.stroke();
+            
+            // Etiquetas
+            ctx.fillStyle = isDarkTheme ? '#e4e4e4' : '#333';
+            ctx.font = '12px Arial';
+            ctx.fillText('Re', canvas.width - 20, originY - 10);
+            ctx.fillText('Im', originX + 10, 15);
+            
+            // Marcas en los ejes
+            ctx.strokeStyle = isDarkTheme ? '#444' : '#ddd';
+            for (let i = -10; i <= 10; i++) {
+                if (i === 0) continue;
+                const x = originX + i * scale;
+                const y = originY + i * scale;
+                
+                // Marcas eje X
+                if (x >= 0 && x <= canvas.width) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, originY - 5);
+                    ctx.lineTo(x, originY + 5);
+                    ctx.stroke();
+                }
+                
+                // Marcas eje Y
+                if (y >= 0 && y <= canvas.height) {
+                    ctx.beginPath();
+                    ctx.moveTo(originX - 5, y);
+                    ctx.lineTo(originX + 5, y);
+                    ctx.stroke();
+                }
+            }
+            
+            // Redibujar puntos
+            plottedPoints.forEach(point => {
+                plotPoint(point.real, point.imag, point.color, point.label);
+            });
+        }
+        
+        function plotPoint(real, imag, color = '#667eea', label = '') {
+            if (!ctx) initCanvas();
+            if (!ctx) return;
+            
+            const x = originX + real * scale;
+            const y = originY - imag * scale;
+            
+            // Dibujar punto
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x, y, 5, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Dibujar vector desde origen
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(originX, originY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            
+            // Etiqueta
+            if (label) {
+                ctx.fillStyle = isDarkTheme ? '#e4e4e4' : '#333';
+                ctx.font = 'bold 14px Arial';
+                ctx.fillText(label, x + 10, y - 10);
+            }
+        }
+        
+        function plotNumbers() {
+            const { z1, z2 } = getComplexNumbers();
+            
+            plottedPoints = [];
+            drawAxes();
+            
+            plottedPoints.push({ real: z1.real, imag: z1.imag, color: '#667eea', label: 'z₁' });
+            plottedPoints.push({ real: z2.real, imag: z2.imag, color: '#764ba2', label: 'z₂' });
+            
+            plotPoint(z1.real, z1.imag, '#667eea', 'z₁');
+            plotPoint(z2.real, z2.imag, '#764ba2', 'z₂');
+        }
+        
+        function plotOperation() {
+            const { z1, z2 } = getComplexNumbers();
+            const result = z1.add(z2); // Por defecto suma
+            
+            plottedPoints = [];
+            drawAxes();
+            
+            plottedPoints.push({ real: z1.real, imag: z1.imag, color: '#667eea', label: 'z₁' });
+            plottedPoints.push({ real: z2.real, imag: z2.imag, color: '#764ba2', label: 'z₂' });
+            plottedPoints.push({ real: result.real, imag: result.imag, color: '#4CAF50', label: 'z₁+z₂' });
+            
+            plotPoint(z1.real, z1.imag, '#667eea', 'z₁');
+            plotPoint(z2.real, z2.imag, '#764ba2', 'z₂');
+            plotPoint(result.real, result.imag, '#4CAF50', 'z₁+z₂');
+        }
+        
+        function clearGraph() {
+            plottedPoints = [];
+            drawAxes();
+        }
+        
+        function zoomGraph(direction) {
+            if (direction === 'in') {
+                scale *= 1.2;
+            } else {
+                scale /= 1.2;
+            }
+            drawAxes();
+        }
+        
+        /* ========================================
+           FUNCIONES DE LA CALCULADORA
+           ======================================== */
+        
+        function getComplexNumbers() {
+            const z1Real = parseFloat(document.getElementById('z1-real').value) || 0;
+            const z1Imag = parseFloat(document.getElementById('z1-imag').value) || 0;
+            const z2Real = parseFloat(document.getElementById('z2-real').value) || 0;
+            const z2Imag = parseFloat(document.getElementById('z2-imag').value) || 0;
+            
+            return {
+                z1: new Complex(z1Real, z1Imag),
+                z2: new Complex(z2Real, z2Imag)
+            };
+        }
+        
+        function updateDisplay(operation, result) {
+            document.getElementById('operation').textContent = operation;
+            document.getElementById('result').textContent = result;
+        }
+        
+        function calculate(operation) {
+            const { z1, z2 } = getComplexNumbers();
+            let result;
+            let operationText;
+            
+            try {
+                switch(operation) {
+                    // Operaciones básicas
+                    case 'add':
+                        result = z1.add(z2);
+                        operationText = `${z1.toString()} + ${z2.toString()}`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    case 'subtract':
+                        result = z1.subtract(z2);
+                        operationText = `${z1.toString()} − ${z2.toString()}`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    case 'multiply':
+                        result = z1.multiply(z2);
+                        operationText = `${z1.toString()} × ${z2.toString()}`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    case 'divide':
+                        result = z1.divide(z2);
+                        operationText = `${z1.toString()} ÷ ${z2.toString()}`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    // Conjugados
+                    case 'conjugate1':
+                        result = z1.conjugate();
+                        operationText = `conj(${z1.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    case 'conjugate2':
+                        result = z2.conjugate();
+                        operationText = `conj(${z2.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    // Módulos
+                    case 'modulus1':
+                        result = z1.modulus();
+                        operationText = `|${z1.toString()}|`;
+                        updateDisplay(operationText, result.toFixed(4));
+                        addToHistory(operationText, result.toFixed(4));
+                        break;
+                        
+                    case 'modulus2':
+                        result = z2.modulus();
+                        operationText = `|${z2.toString()}|`;
+                        updateDisplay(operationText, result.toFixed(4));
+                        addToHistory(operationText, result.toFixed(4));
+                        break;
+                        
+                    // Forma polar
+                    case 'polar1':
+                        operationText = `Polar(${z1.toString()})`;
+                        updateDisplay(operationText, z1.toPolar());
+                        addToHistory(operationText, z1.toPolar());
+                        break;
+                        
+                    case 'polar2':
+                        operationText = `Polar(${z2.toString()})`;
+                        updateDisplay(operationText, z2.toPolar());
+                        addToHistory(operationText, z2.toPolar());
+                        break;
+                        
+                    // Argumentos
+                    case 'argument1':
+                        result = z1.argument();
+                        const degrees1 = result * (180 / Math.PI);
+                        operationText = `arg(${z1.toString()})`;
+                        const resultStr1 = `${result.toFixed(4)} rad (${degrees1.toFixed(2)}°)`;
+                        updateDisplay(operationText, resultStr1);
+                        addToHistory(operationText, resultStr1);
+                        break;
+                        
+                    case 'argument2':
+                        result = z2.argument();
+                        const degrees2 = result * (180 / Math.PI);
+                        operationText = `arg(${z2.toString()})`;
+                        const resultStr2 = `${result.toFixed(4)} rad (${degrees2.toFixed(2)}°)`;
+                        updateDisplay(operationText, resultStr2);
+                        addToHistory(operationText, resultStr2);
+                        break;
+                        
+                    // Potencia
+                    case 'power':
+                        const n = prompt('Ingresa el exponente (n) para z₁ⁿ:', '2');
+                        if (n !== null) {
+                            const exponent = parseFloat(n);
+                            if (!isNaN(exponent)) {
+                                result = z1.power(exponent);
+                                operationText = `(${z1.toString()})^${exponent}`;
+                                updateDisplay(operationText, result.toString());
+                                addToHistory(operationText, result.toString());
+                            } else {
+                                alert('Por favor ingresa un número válido');
+                            }
+                        }
+                        break;
+                        
+                    // Raíz n-ésima
+                    case 'root':
+                        const rootN = prompt('Ingresa el índice de la raíz (n) para ⁿ√z₁:', '2');
+                        if (rootN !== null) {
+                            const index = parseFloat(rootN);
+                            if (!isNaN(index) && index !== 0) {
+                                result = z1.root(index);
+                                operationText = `${index}√(${z1.toString()})`;
+                                updateDisplay(operationText, result.toString());
+                                addToHistory(operationText, result.toString());
+                            } else {
+                                alert('Por favor ingresa un número válido diferente de cero');
+                            }
+                        }
+                        break;
+                        
+                    // Exponenciales
+                    case 'exp1':
+                        result = z1.exp();
+                        operationText = `e^(${z1.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    case 'exp2':
+                        result = z2.exp();
+                        operationText = `e^(${z2.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    // Logaritmos naturales
+                    case 'ln1':
+                        result = z1.ln();
+                        operationText = `ln(${z1.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    case 'ln2':
+                        result = z2.ln();
+                        operationText = `ln(${z2.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    // Raíces cuadradas
+                    case 'sqrt1':
+                        result = z1.sqrt();
+                        operationText = `√(${z1.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    case 'sqrt2':
+                        result = z2.sqrt();
+                        operationText = `√(${z2.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    // Inversos
+                    case 'inverse1':
+                        result = z1.inverse();
+                        operationText = `1/(${z1.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    case 'inverse2':
+                        result = z2.inverse();
+                        operationText = `1/(${z2.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    // Funciones trigonométricas de z1
+                    case 'sin1':
+                        result = z1.sin();
+                        operationText = `sin(${z1.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    case 'cos1':
+                        result = z1.cos();
+                        operationText = `cos(${z1.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    case 'tan1':
+                        result = z1.tan();
+                        operationText = `tan(${z1.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    case 'cot1':
+                        result = z1.cot();
+                        operationText = `cot(${z1.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    case 'sec1':
+                        result = z1.sec();
+                        operationText = `sec(${z1.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    // Funciones hiperbólicas de z1
+                    case 'sinh1':
+                        result = z1.sinh();
+                        operationText = `sinh(${z1.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    case 'cosh1':
+                        result = z1.cosh();
+                        operationText = `cosh(${z1.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    case 'tanh1':
+                        result = z1.tanh();
+                        operationText = `tanh(${z1.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    // Funciones trigonométricas de z2
+                    case 'sin2':
+                        result = z2.sin();
+                        operationText = `sin(${z2.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    case 'cos2':
+                        result = z2.cos();
+                        operationText = `cos(${z2.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    case 'tan2':
+                        result = z2.tan();
+                        operationText = `tan(${z2.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                        
+                    case 'sinh2':
+                        result = z2.sinh();
+                        operationText = `sinh(${z2.toString()})`;
+                        updateDisplay(operationText, result.toString());
+                        addToHistory(operationText, result.toString());
+                        break;
+                }
+            } catch (error) {
+                updateDisplay('Error', error.message);
+            }
+        }
+        
+        function clearAll() {
+            document.getElementById('z1-real').value = '0';
+            document.getElementById('z1-imag').value = '0';
+            document.getElementById('z2-real').value = '0';
+            document.getElementById('z2-imag').value = '0';
+            updateDisplay('', '0');
+        }
+        
+        /* ========================================
+           ATAJOS DE TECLADO
+           ======================================== */
+        
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                calculate('add');
+            } else if (event.key === 'Escape') {
+                clearAll();
+            }
+        });
+        
+        /* ========================================
+           INICIALIZACIÓN
+           ======================================== */
+        
+        window.addEventListener('load', () => {
+            loadTheme();
+            loadHistory();
+            updateHistoryDisplay();
+            
+            // Inicializar canvas si está visible
+            const graphTab = document.getElementById('tab-graph');
+            if (graphTab && graphTab.classList.contains('active')) {
+                setTimeout(() => initCanvas(), 100);
+            }
+        });
+        
+        // Reinicializar canvas al cambiar tamaño de ventana
+        window.addEventListener('resize', () => {
+            if (canvas) {
+                initCanvas();
+                drawAxes();
+            }
+        });
+    </script>
+</body>
+</html>
